@@ -2,6 +2,7 @@
 
 declare prefix="/"
 
+declare mysql_tg_host=
 declare mysql_tg_user=
 declare mysql_tg_passwd=
 declare mysql_tg_db=
@@ -34,6 +35,7 @@ declare TG_WAR_VERSION=$TG_VERSION
 declare TG_WAR="tgol-web-app-$TG_WAR_VERSION.war"
 
 declare -a OPTIONS=(
+        mysql_tg_host
 	mysql_tg_user
 	mysql_tg_passwd
 	mysql_tg_db
@@ -216,7 +218,8 @@ create_tables() {
 	cd "$PKG_DIR/install/engine/sql"
 	cat tanaguru-20-create-tables.sql                \
 	    tanaguru-30-insert.sql |                     \
-		mysql --user=${mysql_tg_user}            \
+		mysql --host=${mysql_tg_host}            \
+		      --user=${mysql_tg_user}            \
 		      --password=${mysql_tg_passwd}      \
                       ${mysql_tg_db} ||                  \
 		fail "Unable to create the engine tables."\
@@ -226,7 +229,8 @@ create_tables() {
 
 	cd "$PKG_DIR/install/web-app/sql"
 	cat tgol-20-create-tables.sql tgol-30-insert.sql | \
-		mysql --user=${mysql_tg_user}            \
+		mysql --host=${mysql_tg_host}            \
+		      --user=${mysql_tg_user}            \
 		      --password=${mysql_tg_passwd}      \
                       ${mysql_tg_db} ||                  \
 		fail "Unable to create and fill the TGSI tables" \
@@ -239,7 +243,8 @@ create_tables() {
             accessiweb2.2-insert.sql               \
             rgaa3.0-insert.sql                \
             rgaa2.2-insert.sql |              \
-		mysql --user=${mysql_tg_user}            \
+		mysql --host=${mysql_tg_host}            \
+		      --user=${mysql_tg_user}            \
 		      --password=${mysql_tg_passwd}      \
                       ${mysql_tg_db} ||                  \
 		fail "Unable to create the rules tables" \
@@ -287,7 +292,7 @@ install_configuration() {
 		fail "Unable to copy the tanaguru configuration"
 	sed -i -e "s#\$TGOL-DEPLOYMENT-PATH .*#${tomcat_webapps}/${tanaguru_webapp_dir}/WEB-INF/conf#" \
 	    -e    "s#\$WEB-APP-URL .*#${tanaguru_url}#"               \
-	    -e    "s#\$SQL_SERVER_URL#localhost#"                     \
+	    -e    "s#\$SQL_SERVER_URL#$mysql_tg_host#"                     \
 	    -e    "s#\$USER#$mysql_tg_user#"                          \
 	    -e    "s#\$PASSWORD#$mysql_tg_passwd#"                    \
 	    -e    "s#\$DATABASE_NAME#$mysql_tg_db#"                   \
